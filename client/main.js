@@ -20,6 +20,14 @@ Template.upload.events({
   }
 });
 
+Template.download.events({
+  'click button'() {
+    Meteor.call('downLoad', function(err, data) {
+      console.log(err, data);
+    });
+  }
+});
+
 const saveFile = function(blob, name, callback) {
   var fileReader = new FileReader();
   fileReader.onload = function(file) {

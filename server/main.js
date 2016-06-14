@@ -1,5 +1,9 @@
 import { Meteor } from 'meteor/meteor';
 
+
+const BASE_PATH = Npm.require('path').resolve('.').split('.meteor')[0] + '/private/';
+
+
 Meteor.publish('Users', function () {
   return Meteor.users.find();
 });
@@ -13,20 +17,19 @@ Meteor.methods({
     let fs = Npm.require('fs');
     let path = Npm.require('path');
     var fiber = Npm.require('fibers');
-    let basepath = path.resolve('.').split('.meteor')[0] + '/private';
     let encoding = 'binary';
 
     name = cleanName(name);
 
     return Async.runSync(function(done) {
-      fs.writeFile(basepath + name, blob, encoding, function(err) {
+      fs.writeFile(BASE_PATH + name, blob, encoding, function(err) {
         if (err) {
           throw (new Meteor.Error(500, 'Failed to save file.', err));
           done(err, null);
         } else {
 
           let excel = new Excel('xlsx');
-          let workbook = excel.readFile(basepath + name);
+          let workbook = excel.readFile(BASE_PATH + name);
           let sheetsName = workbook.SheetNames;
           let sheet = workbook.Sheets[sheetsName[0]]
           let workbookJson = excel.utils.sheet_to_json(sheet, {});
@@ -50,5 +53,18 @@ Meteor.methods({
     function cleanName(str) {
       return str.replace(/\.\./g,'').replace(/\//g,'');
     }
+  },
+  
+  downLoad() {
+    return Async.runSync(function(done) {
+      var mongoXlsx = require('mongo-xlsx');
+      var data = [ { name : "Peter", lastName : "Parker", isSpider : true } ,
+               { name : "Remy",  lastName : "LeBeau", powers : ["kinetic cards"] }];
+      var model = mongoXlsx.buildDynamicModel(data);
+      mongoXlsx.mongoData2Xlsx(data, model, {path: BASE_PATH}, function(err, data) {
+        console.log('File saved at:', data.fullPath);
+        done(null, data)
+      });
+    });
   }
 });
