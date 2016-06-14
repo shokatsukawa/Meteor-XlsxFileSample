@@ -1,0 +1,20 @@
+<head>
+  <title>simple</title>
+</head>
+
+<body>
+  {{> upload}}
+  {{> users}}
+</body>
+
+<template name="upload">
+  <input type=file />
+</template>
+
+<template name="users">
+  <ul>
+    {{#each list}}
+      <li>{{this.username}}</li>
+    {{/each}}
+  </ul>
+</template>
