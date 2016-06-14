@@ -22,3 +22,6 @@ netanelgilad:excel
 accounts-base
 accounts-password
 meteorhacks:async
+cfs:standard-packages
+cfs:filesystem
+session

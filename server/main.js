@@ -1,39 +1,27 @@
 import { Meteor } from 'meteor/meteor';
 
+const fs = require('fs-extra');
+const fiber = Npm.require('fibers');
+const homepath = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+const BASE_PATH = homepath + '/files/'
 
-const BASE_PATH = Npm.require('path').resolve('.').split('.meteor')[0] + '/private/';
-
-
-Meteor.publish('Users', function () {
-  return Meteor.users.find();
-});
-
-Meteor.startup(() => {
-  // code to run on server at startup
-});
+fs.mkdirsSync(BASE_PATH);
 
 Meteor.methods({
   saveFile: function(blob, name) {
-    let fs = Npm.require('fs');
-    let path = Npm.require('path');
-    var fiber = Npm.require('fibers');
     let encoding = 'binary';
-
     name = cleanName(name);
-
     return Async.runSync(function(done) {
       fs.writeFile(BASE_PATH + name, blob, encoding, function(err) {
         if (err) {
           throw (new Meteor.Error(500, 'Failed to save file.', err));
           done(err, null);
         } else {
-
           let excel = new Excel('xlsx');
           let workbook = excel.readFile(BASE_PATH + name);
           let sheetsName = workbook.SheetNames;
           let sheet = workbook.Sheets[sheetsName[0]]
           let workbookJson = excel.utils.sheet_to_json(sheet, {});
-
           let result = [];
           for (let row of workbookJson) {
             fiber(function() {
@@ -54,16 +42,31 @@ Meteor.methods({
       return str.replace(/\.\./g,'').replace(/\//g,'');
     }
   },
-  
-  downLoad() {
+
+  downLoad:function() {
     return Async.runSync(function(done) {
       var mongoXlsx = require('mongo-xlsx');
       var data = [ { name : "Peter", lastName : "Parker", isSpider : true } ,
                { name : "Remy",  lastName : "LeBeau", powers : ["kinetic cards"] }];
+
       var model = mongoXlsx.buildDynamicModel(data);
       mongoXlsx.mongoData2Xlsx(data, model, {path: BASE_PATH}, function(err, data) {
-        console.log('File saved at:', data.fullPath);
-        done(null, data)
+        if (err) {
+          console.log(err);
+          done(err, null);
+          return;
+        }
+        fiber(function() {
+          Files.insert(data.fullPath, function (err, fileObj) {
+            if (err) {
+              console.log(err);
+              done(err, null);
+              return;
+            }
+            console.log(fileObj);
+            done(null, fileObj._id);
+          });
+        }).run();
       });
     });
   }

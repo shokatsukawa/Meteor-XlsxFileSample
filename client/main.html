@@ -6,6 +6,8 @@
   {{> upload}}
   {{> download}}
   {{> users}}
+  {{> files}}
+  {{> downloadFile}}
 </body>
 
 <template name="upload">
@@ -22,4 +24,26 @@
       <li>{{this.username}}</li>
     {{/each}}
   </ul>
+</template>
+
+<template name="files">
+  <ul>
+    {{#each list}}
+      <li>
+        <a href="{{this.url}}" downLoad>{{this.url}}</a>
+      </li>
+    {{/each}}
+  </ul>
+</template>
+
+<template name="downloadFile">
+  {{#with data}}
+  <p>{{this.url}}</p>
+  {{/with}}
+
+  {{#each data}}
+    <li>
+      <h1><a href="{{this.url}}" downLoad>{{this.url}}</a></h1>
+    </li>
+  {{/each}}
 </template>
