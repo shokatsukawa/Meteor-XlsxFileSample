@@ -25,3 +25,5 @@ meteorhacks:async
 cfs:standard-packages
 cfs:filesystem
 session
+cfs:access-point
+momentjs:moment

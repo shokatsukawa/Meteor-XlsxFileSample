@@ -12,12 +12,6 @@ Template.users.helpers({
   }
 });
 
-Template.files.helpers({
-  'list'() {
-    return Files.find();
-  }
-});
-
 Template.upload.events({
   'change input'(e) {
     var file = e.currentTarget.files[0];
@@ -31,26 +25,25 @@ Template.download.events({
   'click button'() {
     Meteor.call('downLoad', function(err, data) {
       console.log(err, data);
-
-      let id = data.result;
-      let file =  Files.findOne({_id: id});
-      console.log(file);
-
-      Session.set('downloadFile', id);
-
-      // let html = `<a id="tes" href="${url}" download>TES</a>`
-      //
-      // $('body').append(html);
-      //
-      // console.log($('#tes'));
+      if (err) {
+        console.log(err);
+      } else {
+        if (data.error) {
+          console.log(data.error);
+        } else {
+          let id = data.result;
+          let file =  Files.findOne({_id: id});
+          let url = file.url({brokenIsFine: true});
+          let html = `<a id="download" href="${url}" download style="display:none">TES</a>`
+          $('body').append(html);
+          $('#download').get(0).click();
+          console.log(file.remove);
+          file.remove(function(err, res) {
+            console.log(err, res);
+          })
+        }
+      }
     });
-  }
-});
-
-Template.downloadFile.helpers({
-  'data'() {
-    console.log(Session.get('downloadFile'));
-    return Files.find({_id: Session.get('downloadFile')});
   }
 });
 

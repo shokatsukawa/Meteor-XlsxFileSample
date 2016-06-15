@@ -46,9 +46,11 @@ Meteor.methods({
   downLoad:function() {
     return Async.runSync(function(done) {
       var mongoXlsx = require('mongo-xlsx');
-      var data = [ { name : "Peter", lastName : "Parker", isSpider : true } ,
-               { name : "Remy",  lastName : "LeBeau", powers : ["kinetic cards"] }];
-
+      var data = Meteor.users.find().fetch();
+      for (let v of data) {
+        let createdAt = v.createdAt;
+        v.createdAt = moment(createdAt).format('YYYY-MM-DD HH:MM');
+      }
       var model = mongoXlsx.buildDynamicModel(data);
       mongoXlsx.mongoData2Xlsx(data, model, {path: BASE_PATH}, function(err, data) {
         if (err) {
@@ -63,7 +65,10 @@ Meteor.methods({
               done(err, null);
               return;
             }
-            console.log(fileObj);
+
+            let url = fileObj.url({brokenIsFine: true});
+            console.log(url);
+
             done(null, fileObj._id);
           });
         }).run();
