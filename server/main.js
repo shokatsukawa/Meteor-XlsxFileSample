@@ -3,7 +3,7 @@ import { Meteor } from 'meteor/meteor';
 const fs = require('fs-extra');
 const fiber = Npm.require('fibers');
 const homepath = process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-const BASE_PATH = homepath + '/files/'
+const BASE_PATH = homepath + '/temp/'
 
 fs.mkdirsSync(BASE_PATH);
 
@@ -25,12 +25,18 @@ Meteor.methods({
           let result = [];
           for (let row of workbookJson) {
             fiber(function() {
-              let userId = Accounts.createUser({
-                username: row['username'],
-                email: row['email']
-              });
-              console.log(userId);
-              result.push(userId)
+              let userId = '';
+              try {
+                userId = Accounts.createUser({
+                  username: row['username'],
+                  email: row['email']
+                });
+              } catch (e) {
+                console.log(e);
+              } finally {
+                console.log(userId);
+                result.push(userId)
+              }
             }).run();
           }
           done(null, result);
@@ -60,15 +66,22 @@ Meteor.methods({
         }
         fiber(function() {
           Files.insert(data.fullPath, function (err, fileObj) {
+            try {
+              // temp file delete
+              var targetRemoveFiles = fs.readdirSync(BASE_PATH);
+              for (let v of targetRemoveFiles) {
+                fs.unlinkSync(BASE_PATH + v);
+              }
+            } catch (e) {
+              console.log(e);
+            }
             if (err) {
               console.log(err);
               done(err, null);
               return;
             }
-
             let url = fileObj.url({brokenIsFine: true});
             console.log(url);
-
             done(null, fileObj._id);
           });
         }).run();

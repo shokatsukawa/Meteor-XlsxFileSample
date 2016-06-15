@@ -37,16 +37,11 @@ Template.download.events({
           let html = `<a id="download" href="${url}" download style="display:none">TES</a>`
           $('body').append(html);
           $('#download').get(0).click();
-          console.log(file.remove);
-          file.remove(function(err, res) {
-            console.log(err, res);
-          })
         }
       }
     });
   }
 });
-
 
 const saveFile = function(blob, name, callback) {
   var fileReader = new FileReader();
