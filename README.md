@@ -2,7 +2,7 @@
 
 Overview
 
-Meteor xlsx upload downLoad sample code.
+Meteor excel file upload downLoad sample code.
 
 ## Requirement
 
