@@ -34,7 +34,7 @@ Template.download.events({
           let id = data.result;
           let file =  Files.findOne({_id: id});
           let url = file.url({brokenIsFine: true});
-          let html = `<a id="download" href="${url}" download style="display:none">TES</a>`
+          let html = `<a id="download" href="${url}" download target="_blank" style="display:none">TES</a>`
           $('body').append(html);
           $('#download').get(0).click();
         }
